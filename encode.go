@@ -1,12 +1,13 @@
 package tiff
 
 import (
-	"compress/zlib"
 	"encoding/binary"
 	"fmt"
 	"io"
 	"math"
 	"unsafe"
+
+	"github.com/klauspost/compress/zlib"
 )
 
 type Encoder struct {

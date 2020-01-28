@@ -10,11 +10,12 @@ import (
 	"unsafe"
 
 	// Compression formats
-	"compress/zlib" // Deflate
-	"image"         // JPEG
-	"image/jpeg"    // JPEG
+	"image"      // JPEG
+	"image/jpeg" // JPEG
 
-	"golang.org/x/image/tiff/lzw" // LZW
+	"github.com/klauspost/compress/zlib" // Deflate
+	"github.com/klauspost/compress/zstd" // Zstd
+	"golang.org/x/image/tiff/lzw"        // LZW
 )
 
 // Iter is a iterator of Images in a TIFF file.
@@ -483,9 +484,30 @@ func (im *Image) decodeRawSegment(raw *io.SectionReader) (r io.ReadCloser, err e
 		return r, nil
 	case CompressionDeflate, CompressionDeflateOld:
 		return zlib.NewReader(raw)
+	case CompressionZstd:
+		return newZstdReader(raw)
 	default:
 		return nil, UnsupportedError(fmt.Sprintf("compression %d", int(compression)))
 	}
+}
+
+// Wrap zstd.Decode to implement io.ReadCloser
+type zstdDecoder zstd.Decoder
+
+func newZstdReader(r io.Reader, opts ...zstd.DOption) (*zstdDecoder, error) {
+	zd, err := zstd.NewReader(r, opts...)
+	return (*zstdDecoder)(zd), err
+}
+
+func (d *zstdDecoder) Read(p []byte) (int, error) {
+	zd := (*zstd.Decoder)(d)
+	return zd.Read(p)
+}
+
+func (d *zstdDecoder) Close() error {
+	zd := (*zstd.Decoder)(d)
+	zd.Close()
+	return nil
 }
 
 func (im *Image) decodeJPEGSegment(raw *io.SectionReader) (r io.ReadCloser, err error) {

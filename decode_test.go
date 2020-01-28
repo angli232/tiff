@@ -224,6 +224,37 @@ func BenchmarkDecode_RGB16_Zip_LE(b *testing.B) {
 	}
 }
 
+func BenchmarkDecode_RGB16_Zstd_LE(b *testing.B) {
+	buf, err := ioutil.ReadFile("../tiff_testdata/rgb16_le_zstd.tif")
+	if err != nil {
+		b.Fatal(err)
+	}
+	rd := bytes.NewReader(buf)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		d, err := tiff.NewDecoder(rd)
+		if err != nil {
+			b.Fatal(err)
+		}
+
+		it := d.Iter()
+		for it.Next() {
+			im := it.Image()
+			width, height := im.WidthHeight()
+			samplesPerPixel := im.SamplesPerPixel()
+			buf := make([]uint16, width*height*samplesPerPixel)
+			err = im.DecodeImage(buf)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+		if err := it.Err(); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
 func BenchmarkDecode_RGB16_LZW_LE(b *testing.B) {
 	buf, err := ioutil.ReadFile("../tiff_testdata/rgb16_le_lzw.tif")
 	if err != nil {
@@ -364,6 +395,36 @@ func BenchmarkDecode_RGB8_ZIP(b *testing.B) {
 	}
 }
 
+func BenchmarkDecode_RGB8_Zstd(b *testing.B) {
+	buf, err := ioutil.ReadFile("../tiff_testdata/rgb8_le_zstd.tif")
+	if err != nil {
+		b.Fatal(err)
+	}
+	rd := bytes.NewReader(buf)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		d, err := tiff.NewDecoder(rd)
+		if err != nil {
+			b.Fatal(err)
+		}
+
+		it := d.Iter()
+		for it.Next() {
+			im := it.Image()
+			width, height := im.WidthHeight()
+			samplesPerPixel := im.SamplesPerPixel()
+			buf := make([]uint8, width*height*samplesPerPixel)
+			err = im.DecodeImage(buf)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+		if err := it.Err(); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
 func BenchmarkDecode_RGB8_LZW(b *testing.B) {
 	buf, err := ioutil.ReadFile("../tiff_testdata/rgb8_le_lzw.tif")
 	if err != nil {
@@ -421,6 +482,7 @@ func TestDecode_RGB16(t *testing.T) {
 		// Lossless compression
 		"../tiff_testdata/rgb16_le_zip.tif",
 		"../tiff_testdata/rgb16_le_lzw.tif",
+		"../tiff_testdata/rgb16_le_zstd.tif",
 	}
 
 	for _, filename := range filenames {
@@ -476,6 +538,7 @@ func TestDecode_RGB8(t *testing.T) {
 		// Lossless compression
 		"../tiff_testdata/rgb8_le_lzw.tif",
 		"../tiff_testdata/rgb8_le_zip.tif",
+		"../tiff_testdata/rgb8_le_zstd.tif",
 	}
 
 	for _, filename := range filenames {
