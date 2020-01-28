@@ -3,15 +3,12 @@ package tiff_test
 import (
 	"bytes"
 	"encoding/binary"
-	"image"
-	"io"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
 
 	tiff "github.com/Andeling/tiff"
-	_ "golang.org/x/image/tiff"
 )
 
 func BenchmarkParseIFD(b *testing.B) {
@@ -36,39 +33,6 @@ func BenchmarkParseIFD(b *testing.B) {
 		}
 	}
 }
-
-func BenchmarkDecode_RGB16_LE_GoImage(b *testing.B) {
-	buf, err := ioutil.ReadFile("../tiff_testdata/rgb16_le.tif")
-	if err != nil {
-		b.Fatal(err)
-	}
-	rd := bytes.NewReader(buf)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		rd.Seek(0, io.SeekStart)
-		_, _, err = image.Decode(rd)
-		if err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
-func BenchmarkDecode_RGB16_BE_GoImage(b *testing.B) {
-	buf, err := ioutil.ReadFile("../tiff_testdata/rgb16_be.tif")
-	if err != nil {
-		b.Fatal(err)
-	}
-	rd := bytes.NewReader(buf)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		rd.Seek(0, io.SeekStart)
-		_, _, err = image.Decode(rd)
-		if err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
 func BenchmarkDecode_RGB16_LE(b *testing.B) {
 	buf, err := ioutil.ReadFile("../tiff_testdata/rgb16_le.tif")
 	if err != nil {
@@ -312,22 +276,6 @@ func BenchmarkDecode_RGB8_JPEG_LE(b *testing.B) {
 			}
 		}
 		if err := it.Err(); err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
-func BenchmarkDecode_RGB8_LE_GoImage(b *testing.B) {
-	buf, err := ioutil.ReadFile("../tiff_testdata/rgb8_le.tif")
-	if err != nil {
-		b.Fatal(err)
-	}
-	rd := bytes.NewReader(buf)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		rd.Seek(0, io.SeekStart)
-		_, _, err = image.Decode(rd)
-		if err != nil {
 			b.Fatal(err)
 		}
 	}
