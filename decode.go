@@ -13,9 +13,9 @@ import (
 	"image"      // JPEG
 	"image/jpeg" // JPEG
 
+	"github.com/Andeling/tiff/lzw"       // LZW
 	"github.com/klauspost/compress/zlib" // Deflate
 	"github.com/klauspost/compress/zstd" // Zstd
-	"golang.org/x/image/tiff/lzw"        // LZW
 )
 
 // Iter is a iterator of Images in a TIFF file.
